@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My Classroom · Account Security</title><link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}"></head>
+<body><header><a class="brand" href="/classroom">✦ MY <span>CLASSROOM</span></a><nav>
+{% if g.user %}<a href="/account">My account</a>{% if g.user.role == 'admin' %}<a href="/admin">Operations</a><a href="/admin/outbox">Notifications</a>{% endif %}<form method="post" action="/logout"><input type="hidden" name="csrf" value="{{ session.csrf }}"><button class="quiet">Sign out</button></form>{% else %}<a href="/login">Sign in</a><a href="/register">Create account</a>{% endif %}</nav></header>
+<main>{% for message in get_flashed_messages() %}<div class="notice" role="status">{{ message }}</div>{% endfor %}{% block content %}{% endblock %}</main>
+<footer>RESEARCH PROTOTYPE <span>Human review required · No automatic blocking · No exact location tracking</span></footer></body></html>

@@ -1,0 +1,27 @@
+{
+  "schema": "flow-counts-v1",
+  "algorithm": "decision-tree-v1",
+  "features": [
+    "duration_seconds",
+    "forward_packets",
+    "backward_packets",
+    "destination_port"
+  ],
+  "dataset": "CIC-IDS2017 supplied MachineLearningCVE CSVs",
+  "threshold": 0.5,
+  "training_rows": 6854,
+  "training_sources": [
+    "Monday-WorkingHours.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+    "Tuesday-WorkingHours.pcap_ISCX.csv",
+    "Wednesday-workingHours.pcap_ISCX.csv"
+  ],
+  "transform": "Raw four features plus deterministic packet rate and backward fraction",
+  "scope": "Validation-selected binary decision tree; no production reliability claim",
+  "max_depth": 12,
+  "min_samples_leaf": 10,
+  "selection": "Maximum validation balanced accuracy; Friday and test excluded",
+  "validation_rows": 2279,
+  "seed": 42
+}

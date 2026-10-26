@@ -1,0 +1,413 @@
+{
+  "metadata": {
+    "schema": "flow-counts-v1",
+    "algorithm": "decision-tree-v1",
+    "features": [
+      "duration_seconds",
+      "forward_packets",
+      "backward_packets",
+      "destination_port"
+    ],
+    "dataset": "CIC-IDS2017 supplied MachineLearningCVE CSVs",
+    "threshold": 0.5,
+    "training_rows": 6854,
+    "training_sources": [
+      "Monday-WorkingHours.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+      "Tuesday-WorkingHours.pcap_ISCX.csv",
+      "Wednesday-workingHours.pcap_ISCX.csv"
+    ],
+    "transform": "Raw four features plus deterministic packet rate and backward fraction",
+    "scope": "Validation-selected binary decision tree; no production reliability claim",
+    "max_depth": 12,
+    "min_samples_leaf": 10,
+    "selection": "Maximum validation balanced accuracy; Friday and test excluded",
+    "validation_rows": 2279,
+    "seed": 42
+  },
+  "audit": {
+    "files": [
+      {
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+        "rows_read": 225745,
+        "valid_rows": 225743,
+        "sampled_rows": 3000
+      },
+      {
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "rows_read": 286467,
+        "valid_rows": 286431,
+        "sampled_rows": 3000
+      },
+      {
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "rows_read": 191033,
+        "valid_rows": 191024,
+        "sampled_rows": 3000
+      },
+      {
+        "file": "Monday-WorkingHours.pcap_ISCX.csv",
+        "rows_read": 529918,
+        "valid_rows": 529903,
+        "sampled_rows": 1500
+      },
+      {
+        "file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "rows_read": 288602,
+        "valid_rows": 288598,
+        "sampled_rows": 1536
+      },
+      {
+        "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "rows_read": 170366,
+        "valid_rows": 170355,
+        "sampled_rows": 3673
+      },
+      {
+        "file": "Tuesday-WorkingHours.pcap_ISCX.csv",
+        "rows_read": 445909,
+        "valid_rows": 445892,
+        "sampled_rows": 4500
+      },
+      {
+        "file": "Wednesday-workingHours.pcap_ISCX.csv",
+        "rows_read": 692703,
+        "valid_rows": 692682,
+        "sampled_rows": 7511
+      }
+    ],
+    "duplicate_feature_rows_removed": 8815
+  },
+  "results": {
+    "validation": {
+      "rows": 2279,
+      "tree": {
+        "accuracy": 0.9653356735410268,
+        "precision": 0.9768408551068883,
+        "recall": 0.9762611275964391,
+        "f1": 0.9765509053131493,
+        "true_negative": 555,
+        "false_positive": 39,
+        "false_negative": 40,
+        "true_positive": 1645,
+        "false_positive_rate": 0.06565656565656566,
+        "false_negative_rate": 0.02373887240356083,
+        "balanced_accuracy": 0.9553022809699367
+      },
+      "linear_same_training_rows": {
+        "accuracy": 0.8815269855199649,
+        "precision": 0.8834688346883469,
+        "recall": 0.9673590504451038,
+        "f1": 0.9235127478753541,
+        "true_negative": 379,
+        "false_positive": 215,
+        "false_negative": 55,
+        "true_positive": 1630,
+        "false_positive_rate": 0.36195286195286197,
+        "false_negative_rate": 0.032640949554896145,
+        "balanced_accuracy": 0.802703094246121
+      },
+      "per_label": {
+        "BENIGN": {
+          "rows": 594,
+          "predicted_attack_fraction": 0.06565656565656566
+        },
+        "DoS GoldenEye": {
+          "rows": 280,
+          "predicted_attack_fraction": 0.9678571428571429
+        },
+        "DoS Hulk": {
+          "rows": 248,
+          "predicted_attack_fraction": 0.9435483870967742
+        },
+        "DoS Slowhttptest": {
+          "rows": 269,
+          "predicted_attack_fraction": 1.0
+        },
+        "DoS slowloris": {
+          "rows": 231,
+          "predicted_attack_fraction": 0.987012987012987
+        },
+        "FTP-Patator": {
+          "rows": 95,
+          "predicted_attack_fraction": 0.9894736842105263
+        },
+        "Heartbleed": {
+          "rows": 2,
+          "predicted_attack_fraction": 1.0
+        },
+        "Infiltration": {
+          "rows": 6,
+          "predicted_attack_fraction": 0.5
+        },
+        "SSH-Patator": {
+          "rows": 164,
+          "predicted_attack_fraction": 0.975609756097561
+        },
+        "Web Attack \ufffd Brute Force": {
+          "rows": 265,
+          "predicted_attack_fraction": 0.9849056603773585
+        },
+        "Web Attack \ufffd Sql Injection": {
+          "rows": 3,
+          "predicted_attack_fraction": 0.6666666666666666
+        },
+        "Web Attack \ufffd XSS": {
+          "rows": 122,
+          "predicted_attack_fraction": 0.9918032786885246
+        }
+      }
+    },
+    "same_distribution_test": {
+      "rows": 3037,
+      "tree": {
+        "accuracy": 0.9716825814948963,
+        "precision": 0.9817127564674398,
+        "recall": 0.9799643811219947,
+        "f1": 0.9808377896613192,
+        "true_negative": 750,
+        "false_positive": 41,
+        "false_negative": 45,
+        "true_positive": 2201,
+        "false_positive_rate": 0.051833122629582805,
+        "false_negative_rate": 0.020035618878005344,
+        "balanced_accuracy": 0.964065629246206
+      },
+      "linear_same_training_rows": {
+        "accuracy": 0.8929864998353638,
+        "precision": 0.8925214548426645,
+        "recall": 0.9723953695458593,
+        "f1": 0.9307479224376731,
+        "true_negative": 528,
+        "false_positive": 263,
+        "false_negative": 62,
+        "true_positive": 2184,
+        "false_positive_rate": 0.3324905183312263,
+        "false_negative_rate": 0.027604630454140695,
+        "balanced_accuracy": 0.8199524256073165
+      },
+      "per_label": {
+        "BENIGN": {
+          "rows": 791,
+          "predicted_attack_fraction": 0.051833122629582805
+        },
+        "DoS GoldenEye": {
+          "rows": 373,
+          "predicted_attack_fraction": 0.967828418230563
+        },
+        "DoS Hulk": {
+          "rows": 331,
+          "predicted_attack_fraction": 0.972809667673716
+        },
+        "DoS Slowhttptest": {
+          "rows": 358,
+          "predicted_attack_fraction": 0.9972067039106145
+        },
+        "DoS slowloris": {
+          "rows": 309,
+          "predicted_attack_fraction": 0.9967637540453075
+        },
+        "FTP-Patator": {
+          "rows": 126,
+          "predicted_attack_fraction": 1.0
+        },
+        "Heartbleed": {
+          "rows": 2,
+          "predicted_attack_fraction": 1.0
+        },
+        "Infiltration": {
+          "rows": 9,
+          "predicted_attack_fraction": 0.3333333333333333
+        },
+        "SSH-Patator": {
+          "rows": 219,
+          "predicted_attack_fraction": 0.9634703196347032
+        },
+        "Web Attack \ufffd Brute Force": {
+          "rows": 353,
+          "predicted_attack_fraction": 0.9858356940509915
+        },
+        "Web Attack \ufffd Sql Injection": {
+          "rows": 4,
+          "predicted_attack_fraction": 1.0
+        },
+        "Web Attack \ufffd XSS": {
+          "rows": 162,
+          "predicted_attack_fraction": 0.9814814814814815
+        }
+      }
+    },
+    "friday_test": {
+      "rows": 6735,
+      "tree": {
+        "accuracy": 0.605939123979213,
+        "precision": 0.8330914368650217,
+        "recall": 0.3213885778275476,
+        "f1": 0.46383838383838377,
+        "true_negative": 2933,
+        "false_positive": 230,
+        "false_negative": 2424,
+        "true_positive": 1148,
+        "false_positive_rate": 0.07271577616187164,
+        "false_negative_rate": 0.6786114221724524,
+        "balanced_accuracy": 0.624336400832838
+      },
+      "linear_same_training_rows": {
+        "accuracy": 0.44216778025241277,
+        "precision": 0.45808790212958767,
+        "recall": 0.2830347144456887,
+        "f1": 0.3498875237930438,
+        "true_negative": 1967,
+        "false_positive": 1196,
+        "false_negative": 2561,
+        "true_positive": 1011,
+        "false_positive_rate": 0.37812203604173256,
+        "false_negative_rate": 0.7169652855543113,
+        "balanced_accuracy": 0.45245633920197803
+      },
+      "per_label": {
+        "BENIGN": {
+          "rows": 3163,
+          "predicted_attack_fraction": 0.07271577616187164
+        },
+        "Bot": {
+          "rows": 1474,
+          "predicted_attack_fraction": 0.0013568521031207597
+        },
+        "DDoS": {
+          "rows": 1490,
+          "predicted_attack_fraction": 0.7550335570469798
+        },
+        "PortScan": {
+          "rows": 608,
+          "predicted_attack_fraction": 0.03453947368421053
+        }
+      }
+    },
+    "unseen_web_attacks_with_benign_controls": {
+      "accuracy": 0.37151810584958217,
+      "precision": 0.896551724137931,
+      "recall": 0.14992791926958193,
+      "f1": 0.2568958419102511,
+      "true_negative": 755,
+      "false_positive": 36,
+      "false_negative": 1769,
+      "true_positive": 312,
+      "false_positive_rate": 0.045512010113780026,
+      "false_negative_rate": 0.8500720807304181,
+      "balanced_accuracy": 0.552207954577901
+    }
+  },
+  "candidates_validation_only": [
+    {
+      "depth": 4,
+      "min_samples_leaf": 10,
+      "metrics": {
+        "accuracy": 0.9486616937253182,
+        "precision": 0.9579439252336449,
+        "recall": 0.973293768545994,
+        "f1": 0.9655578451574919,
+        "true_negative": 522,
+        "false_positive": 72,
+        "false_negative": 45,
+        "true_positive": 1640,
+        "false_positive_rate": 0.12121212121212122,
+        "false_negative_rate": 0.026706231454005934,
+        "balanced_accuracy": 0.9260408236669364
+      }
+    },
+    {
+      "depth": 4,
+      "min_samples_leaf": 30,
+      "metrics": {
+        "accuracy": 0.9464677490127249,
+        "precision": 0.9578207381370826,
+        "recall": 0.9703264094955489,
+        "f1": 0.9640330188679245,
+        "true_negative": 522,
+        "false_positive": 72,
+        "false_negative": 50,
+        "true_positive": 1635,
+        "false_positive_rate": 0.12121212121212122,
+        "false_negative_rate": 0.02967359050445104,
+        "balanced_accuracy": 0.9245571441417139
+      }
+    },
+    {
+      "depth": 8,
+      "min_samples_leaf": 10,
+      "metrics": {
+        "accuracy": 0.9657744624835454,
+        "precision": 0.9729252501471454,
+        "recall": 0.9810089020771513,
+        "f1": 0.9769503546099291,
+        "true_negative": 548,
+        "false_positive": 46,
+        "false_negative": 32,
+        "true_positive": 1653,
+        "false_positive_rate": 0.07744107744107744,
+        "false_negative_rate": 0.018991097922848664,
+        "balanced_accuracy": 0.9517839123180369
+      }
+    },
+    {
+      "depth": 8,
+      "min_samples_leaf": 30,
+      "metrics": {
+        "accuracy": 0.9657744624835454,
+        "precision": 0.9707088459285296,
+        "recall": 0.9833827893175074,
+        "f1": 0.977004716981132,
+        "true_negative": 544,
+        "false_positive": 50,
+        "false_negative": 28,
+        "true_positive": 1657,
+        "false_positive_rate": 0.08417508417508418,
+        "false_negative_rate": 0.01661721068249258,
+        "balanced_accuracy": 0.9496038525712116
+      }
+    },
+    {
+      "depth": 12,
+      "min_samples_leaf": 10,
+      "metrics": {
+        "accuracy": 0.9653356735410268,
+        "precision": 0.9768408551068883,
+        "recall": 0.9762611275964391,
+        "f1": 0.9765509053131493,
+        "true_negative": 555,
+        "false_positive": 39,
+        "false_negative": 40,
+        "true_positive": 1645,
+        "false_positive_rate": 0.06565656565656566,
+        "false_negative_rate": 0.02373887240356083,
+        "balanced_accuracy": 0.9553022809699367
+      }
+    },
+    {
+      "depth": 12,
+      "min_samples_leaf": 30,
+      "metrics": {
+        "accuracy": 0.9657744624835454,
+        "precision": 0.9734826163818503,
+        "recall": 0.9804154302670623,
+        "f1": 0.9769367238320521,
+        "true_negative": 549,
+        "false_positive": 45,
+        "false_negative": 33,
+        "true_positive": 1652,
+        "false_positive_rate": 0.07575757575757576,
+        "false_negative_rate": 0.019584569732937686,
+        "balanced_accuracy": 0.9523289272547433
+      }
+    }
+  ],
+  "cautions": [
+    "Friday was examined in earlier work: this is a development comparison, not a pristine external validation.",
+    "Balanced class weights and label sampling change score interpretation; scores are not calibrated.",
+    "Do not tune further on Friday and present it as a fresh test.",
+    "TrafficLabelling overlaps the same benchmark and is not an external test.",
+    "Exact tree paths explain model decisions, not attacker intent or causal mechanisms."
+  ]
+}

@@ -1,11 +1,10 @@
-import { useState } from "react";
+import SecurityShell from './SecurityShell';
 
 function App() {
-  const [completed, setCompleted] = useState({
-    cloud: 8,
-    operating: 6,
-    networks: 4,
-  });
+  return <SecurityShell>{props => <Dashboard {...props} />}</SecurityShell>;
+}
+
+function Dashboard({ completed, tasks, saving, onComplete, onTask, securityPanel }) {
 
   const subjects = [
     {
@@ -46,13 +45,7 @@ function App() {
   );
 
   const toggleDemoTask = (subjectId) => {
-    setCompleted((previous) => ({
-      ...previous,
-      [subjectId]: Math.min(
-        previous[subjectId] + 1,
-        subjects.find((subject) => subject.id === subjectId).total
-      ),
-    }));
+    onComplete(subjectId, subjects.find(subject => subject.id === subjectId).total);
   };
 
   return (
@@ -131,7 +124,7 @@ function App() {
 
           <div>
             <p className="mb-1 text-sm font-medium text-[#958ca5]">
-              Sunday, August 16
+              {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
 
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -148,6 +141,8 @@ function App() {
           </div>
 
         </header>
+
+        {securityPanel}
 
 
         {/* Progress card */}
@@ -186,11 +181,11 @@ function App() {
 
               <div>
                 <p className="text-2xl font-bold">
-                  7 days
+                  Saved
                 </p>
 
                 <p className="text-xs text-purple-100">
-                  current study streak
+                  per-account progress
                 </p>
               </div>
 
@@ -285,6 +280,7 @@ function App() {
 
                     <button
                       onClick={() => toggleDemoTask(subject.id)}
+                      disabled={saving}
                       className="text-xs font-semibold text-[#958ca5] hover:text-[#7654c7]"
                     >
                       + Complete topic
@@ -323,23 +319,33 @@ function App() {
             <Task
               title="Revise Cloud Service Models"
               subject="Cloud Computing"
-              completed
+              completed={tasks['cloud-models']}
+              onToggle={() => onTask('cloud-models')}
+              disabled={saving}
             />
 
             <Task
               title="Read Process Scheduling"
               subject="Operating Systems"
-              completed
+              completed={tasks['process-scheduling']}
+              onToggle={() => onTask('process-scheduling')}
+              disabled={saving}
             />
 
             <Task
               title="Study TCP/IP"
               subject="Computer Networks"
+              completed={tasks['tcp-ip']}
+              onToggle={() => onTask('tcp-ip')}
+              disabled={saving}
             />
 
             <Task
               title="Review Virtualization"
               subject="Cloud Computing"
+              completed={tasks.virtualization}
+              onToggle={() => onTask('virtualization')}
+              disabled={saving}
             />
 
           </div>
@@ -353,16 +359,17 @@ function App() {
 }
 
 
-function Task({ title, subject, completed = false }) {
-
-  const [isCompleted, setIsCompleted] = useState(completed);
+function Task({ title, subject, completed: isCompleted = false, onToggle, disabled }) {
 
   return (
 
     <div className="flex items-center gap-4 rounded-2xl px-3 py-4 transition hover:bg-[#faf8ff]">
 
       <button
-        onClick={() => setIsCompleted(!isCompleted)}
+        onClick={onToggle}
+        disabled={disabled}
+        aria-label={`Toggle ${title}`}
+        aria-pressed={isCompleted}
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 transition ${
           isCompleted
             ? "border-[#8768d4] bg-[#8768d4] text-white"

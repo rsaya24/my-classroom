@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block content %}<section class="form-card"><h1>Verify your email</h1><p>Confirm that you registered this address to receive account security notifications.</p><form method="post"><input type="hidden" name="csrf" value="{{ session.csrf }}"><button>Confirm my email</button></form></section>{% endblock %}
+
