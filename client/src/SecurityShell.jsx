@@ -19,7 +19,7 @@ export default function SecurityShell({ children }) {
         if (!session.user) { if (active) setState({ ...session, loading: false }); return; }
         const [progress, security] = await Promise.all([api('/api/classroom/progress'), api('/api/classroom/security')]);
         if (active) setState({ ...session, ...progress, security, loading: false });
-      } catch { if (active) { setError('Could not reach the classroom server. Start the backend and refresh.'); setState({ loading: false, user: null }); } }
+      } catch { if (active) { setError('The classroom backend is unavailable or not configured yet. Please contact the project administrator.'); setState({ loading: false, user: null }); } }
     }
     load();
     return () => { active = false; };
@@ -49,7 +49,7 @@ export default function SecurityShell({ children }) {
     <div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-bold">Account & security</h3><p className="break-all text-sm text-[#777080]">{state.user.email} · {state.user.verified ? 'Email verified' : 'Email verification pending'}</p></div>
       <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[#7654c7]"><a href="/account">My alerts ({state.security.alerts.length})</a>{state.user.role === 'admin' && <a href="/admin">Security operations</a>}
         <form method="post" action="/logout"><input type="hidden" name="csrf" value={state.csrf} /><button type="submit">Sign out</button></form></div></div>
-    <p className="mt-3 text-xs text-[#777080]">{state.security.email_mode === 'outbox' ? 'Notifications are saved in the local demo outbox—not sent to your inbox.' : 'Email delivery is configured; delivery status is recorded by the notification worker.'} Login monitoring uses rules. Network ML is a separate signal.</p>
+    <p className="mt-3 text-xs text-[#777080]">{state.security.email_mode === 'smtp' ? 'SMTP delivery is configured; check notification records for delivery status.' : state.security.email_mode === 'outbox' ? 'Notifications are saved in the local demo outbox—not sent to your inbox.' : 'Email delivery is not enabled. Notifications remain queued.'} Login monitoring uses rules. Network ML is a separate signal.</p>
     {state.security.alerts.length > 0 && <div className="mt-4 rounded-xl bg-amber-50 p-4"><strong>{state.security.alerts[0].title}</strong><p className="mt-1 text-sm">{state.security.alerts[0].explanation.failed_attempts} failed attempts in {state.security.alerts[0].explanation.window_seconds} seconds. This is suspicious activity, not proof of account access. <a className="underline" href="/account">Review</a></p></div>}
     <p aria-live="polite" className="mt-2 text-xs">{saving ? 'Saving progress…' : 'Progress is stored privately in your account.'}</p>
     {error && <p role="alert" className="mt-3 text-red-700">{error}</p>}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "flask",
+  "buildCommand": "npm --prefix client ci && npm --prefix client run build && python build_vercel.py",
+  "functions": {
+    "app.py": {
+      "maxDuration": 120,
+      "excludeFiles": "{my-classroom-upload/**,client/node_modules/**,server/tests/**,server/instance/**,**/__pycache__/**,**/.venv/**}"
+    }
+  }
+}

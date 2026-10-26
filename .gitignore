@@ -6,3 +6,5 @@ server/instance/
 .env
 .env.*
 !.env.example
+/public/
+.vercel/

@@ -27,6 +27,7 @@ def main():
     mail = commands.add_parser('mail')
     mail.add_argument('--watch', action='store_true')
     commands.add_parser('doctor')
+    commands.add_parser('init-db')
     commands.add_parser('configure-email')
     commands.add_parser('init-sensor')
     backup = commands.add_parser('backup')
@@ -34,8 +35,10 @@ def main():
     geo = commands.add_parser('configure-location')
     geo.add_argument('--database', required=True)
     args = parser.parse_args()
-    app = create_app()
+    app = create_app({'INIT_DATABASE': True} if args.command == 'init-db' else None)
     if args.command == 'backup':
+        if app.config.get('DATABASE_URL'):
+            parser.error('Use your PostgreSQL provider backup or pg_dump; SQLite backup is local-only')
         target = Path(args.output).resolve()
         # Never overwrite a database or previous backup. Use SQLite's online backup API,
         # not a raw copy of a live database with a separate WAL file.
@@ -44,6 +47,8 @@ def main():
         with app.app_context(), sqlite3.connect(target) as destination:
             db().backup(destination)
         print('Database backup created. It contains private account and alert records; protect it.')
+    elif args.command == 'init-db':
+        print('Database schema initialized. Existing records were preserved.')
     elif args.command == 'serve':
         app.run(host='127.0.0.1', port=args.port, debug=False)
     elif args.command == 'create-admin':

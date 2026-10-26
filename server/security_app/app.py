@@ -38,15 +38,15 @@ CREATE INDEX IF NOT EXISTS alert_dedup ON alerts(dedup_key, created);
 def db():
     if 'db' not in g:
         from flask import current_app
-        g.db = sqlite3.connect(current_app.config['DATABASE'], timeout=15)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute('PRAGMA journal_mode=WAL')
+        from security_app.database import connect
+        g.db = connect(current_app.config)
     return g.db
 
 
 def queue_email(recipient, subject, body):
     db().execute('INSERT INTO notifications(created,recipient,subject,body) VALUES(?,?,?,?)',
                  (time.time(), recipient, subject, body))
+    g.mail_queued = True
 
 
 def require_login(admin=False):
@@ -68,8 +68,9 @@ def create_app(config=None):
     if config and 'INSTANCE' in config:
         instance = Path(config['INSTANCE']).resolve()
     instance.mkdir(parents=True, exist_ok=True, mode=0o700)
+    secret = os.environ.get('SESSION_SECRET')
     secret_file = instance / 'session.key'
-    if not secret_file.exists():
+    if not secret and not secret_file.exists():
         try:
             fd = os.open(secret_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             with os.fdopen(fd, 'w') as stream:
@@ -77,7 +78,9 @@ def create_app(config=None):
         except FileExistsError:
             pass
     app = Flask(__name__)
-    app.config.update(SECRET_KEY=secret_file.read_text().strip(), INSTANCE=str(instance),
+    app.config.update(SECRET_KEY=secret or secret_file.read_text().strip(), INSTANCE=str(instance),
+                      DATABASE_URL=os.environ.get('DATABASE_URL'),
+                      INIT_DATABASE=os.environ.get('INIT_DATABASE', '1') == '1',
                       DATABASE=str(instance / 'security.sqlite3'), MODEL_DIR=str(instance / 'model'),
                       SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',
                       SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE') == '1',
@@ -94,16 +97,17 @@ def create_app(config=None):
         # Enable only when ingress is restricted to one proxy that overwrites these headers.
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=0, x_port=0, x_prefix=0)
-    with app.app_context():
-        db().executescript(DDL)
-        db().executescript(WEBSITE_DDL)
-        columns = {row['name'] for row in db().execute('PRAGMA table_info(notifications)')}
-        for column, kind in [('claim_token', 'TEXT'), ('lease_until', 'REAL DEFAULT 0')]:
-            if column not in columns:
-                db().execute(f'ALTER TABLE notifications ADD COLUMN {column} {kind}')
-        db().commit()
-        g.pop('db').close()
-    Path(app.config['DATABASE']).chmod(0o600)
+    if app.config['INIT_DATABASE']:
+        from security_app.database import initialize
+        with app.app_context():
+            try:
+                initialize(db(), DDL + WEBSITE_DDL, bool(app.config['DATABASE_URL']))
+            finally:
+                connection = g.pop('db', None)
+                if connection:
+                    connection.close()
+    if not app.config['DATABASE_URL'] and Path(app.config['DATABASE']).exists():
+        Path(app.config['DATABASE']).chmod(0o600)
     try:
         app.extensions['flow_model'] = FlowModel(app.config['MODEL_DIR'])
     except FileNotFoundError:
@@ -118,6 +122,11 @@ def create_app(config=None):
 
     @app.before_request
     def security():
+        if request.endpoint == 'mail_cron':
+            token = os.environ.get('CRON_SECRET', '')
+            if len(token) < 32 or not hmac.compare_digest(request.headers.get('Authorization', ''), f'Bearer {token}'):
+                abort(401)
+            return None
         g.user = db().execute('SELECT * FROM users WHERE id=?', (session.get('user_id'),)).fetchone()
         if 'csrf' not in session:
             session['csrf'] = secrets.token_urlsafe(32)
@@ -132,6 +141,14 @@ def create_app(config=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['Cache-Control'] = 'no-store'
+        if (getattr(g, 'mail_queued', False) and app.config.get('MAIL_DELIVERY') == 'inline'
+                and app.config['MAIL_MODE'] == 'smtp' and response.status_code < 500):
+            # Bound the work within the request lifetime; no fire-and-forget threads.
+            from security_app.mail import deliver
+            try:
+                deliver(app, limit=2)
+            except Exception:
+                app.logger.warning('Email processing deferred; inspect the durable queue.')
         return response
 
     @app.template_filter('when')
@@ -353,5 +370,12 @@ def create_app(config=None):
     @app.get('/health')
     def health():
         return jsonify(status='ok', model_loaded=app.extensions['flow_model'] is not None)
+
+    @app.get('/api/jobs/mail')
+    def mail_cron():
+        if app.config['MAIL_MODE'] != 'smtp':
+            return jsonify(error='SMTP delivery is not configured'), 503
+        from security_app.mail import deliver
+        return jsonify(processed=deliver(app, limit=2))
 
     return app

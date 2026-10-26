@@ -11,6 +11,8 @@ from security_app.app import db
 
 
 def deliver(app, limit=50):
+    if app.config['MAIL_MODE'] == 'disabled':
+        return 0  # Keep records pending in the database; never write a temporary outbox.
     with app.app_context():
         # Claim briefly; never hold the database write lock during network I/O.
         db().execute('BEGIN IMMEDIATE')

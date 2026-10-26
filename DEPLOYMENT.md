@@ -1,5 +1,8 @@
 # Deployment and operations
 
+For the new Vercel/PostgreSQL preview path, see [VERCEL_SETUP.md](VERCEL_SETUP.md).
+The persistent single-host instructions below remain the local/Compose option.
+
 ## Supported topology
 
 One persistent Linux host runs the built React client and Flask API on the same origin,

@@ -22,9 +22,10 @@ def create_app(config=None):
         if key in os.environ and (not config or key not in config):
             settings[key] = os.environ[key]
     app = security_app(settings)
-    with app.app_context():
-        db().execute('CREATE TABLE IF NOT EXISTS classroom_progress(user_id INTEGER PRIMARY KEY, payload TEXT NOT NULL)')
-        db().commit()
+    if app.config['INIT_DATABASE']:
+        with app.app_context():
+            db().execute('CREATE TABLE IF NOT EXISTS classroom_progress(user_id INTEGER PRIMARY KEY, payload TEXT NOT NULL)')
+            db().commit()
     app.view_functions['home'] = lambda: redirect('/classroom')
 
     @app.after_request

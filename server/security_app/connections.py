@@ -26,6 +26,5 @@ def status(app, db):
         {'component': 'Network collector', 'configuration': 'sensor token configured' if app.config.get('SENSOR_TOKEN') else 'sensor token missing',
          'evidence': ('Last Zeek event received ' + str(int(time.time() - last_flow)) + ' seconds ago; source authenticity depends on sensor') if last_flow else 'No Zeek telemetry received; CSV replay does not count'},
         {'component': 'Zeek on this machine', 'configuration': 'installed' if shutil.which('zeek') else 'not installed', 'evidence': 'A collector may instead run on the authorized server'},
-        {'component': 'Email', 'configuration': app.config['MAIL_MODE'], 'evidence': 'SMTP settings present; delivery unverified' if smtp_ready else 'SMTP settings incomplete; local outbox is available'},
+        {'component': 'Email', 'configuration': app.config['MAIL_MODE'], 'evidence': 'SMTP settings present; delivery unverified' if smtp_ready else 'SMTP settings incomplete; messages are not being sent'},
         {'component': 'IP location', 'configuration': geo_status, 'evidence': 'Approximate network location only; no exact person tracking'}]
-

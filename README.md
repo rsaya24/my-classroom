@@ -176,3 +176,8 @@ SQLite remains the implemented database. PostgreSQL migration is **not implement
 
 See `DEPLOYMENT.md` for the Gunicorn/container setup, persistent storage, backup and deployment checklist.
 See `PROJECT_STATUS.md` for implemented scope, remaining work and the demonstration sequence.
+# Vercel deployment update
+
+The preview backend now has a PostgreSQL adapter and root Flask deployment configuration.
+See [VERCEL_SETUP.md](VERCEL_SETUP.md) for required hosting settings, private credentials,
+database initialization and deployment checks. This is not yet a verified live backend deployment.

@@ -1,4 +1,21 @@
-# Verification record — 25 October 2026
+# Verification record — 26 October 2026 update
+
+| New check | Observed result |
+|---|---|
+| Full regression suite, including real PostgreSQL | **40 passed in 18.62 seconds** |
+| PostgreSQL test environment | Temporary PostgreSQL 16.15, private Unix socket, no TCP listener, synthetic records only |
+| PostgreSQL behavior | Registration/duplicate rollback, login alerts, timestamp precision, progress persistence, concurrent flow deduplication and mail claims passed |
+| Vercel adapter | Missing configuration returns 503; configured import does not connect to database or initialize schema |
+| Email configuration guards | Disabled delivery preserves pending records; authenticated retry endpoint and inline opt-in tests passed |
+| Updated React build and lint | Passed |
+| Vercel public asset preparation | Executed successfully |
+| Live Vercel backend / hosted PostgreSQL / inbox delivery | **Not verified; account and provider setup still required** |
+
+The temporary PostgreSQL process was stopped after the tests. No system PostgreSQL service
+was installed. Local unit tests do not verify Vercel packaging limits, runtime performance,
+sender verification, or live deployment behavior. SHAP/LIME remain included and locally tested.
+
+## Previous verification — 25 October 2026
 
 | Check | Observed result |
 |---|---|

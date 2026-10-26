@@ -38,8 +38,10 @@ changes prevalence and score interpretation. TrafficLabelling overlaps CIC and i
 
 ## Not completed or not connected
 
-PostgreSQL migration is not implemented. Public backend hosting, repository push, real SMTP,
-licensed GeoIP data and an authorized live collector remain external setup work. Docker packaging
+PostgreSQL support and Vercel deployment configuration are now implemented and locally tested;
+see VERCEL_SETUP.md. Existing SQLite records are not automatically migrated. The repository has
+been uploaded to the security-integration branch. Public backend hosting, a hosted database,
+real SMTP, licensed GeoIP data and an authorized live collector remain external setup work. Docker packaging
 does not itself demonstrate successful container deployment. This prototype is not a complete
 production account-security product: recovery, MFA, retention enforcement and deployment hardening
 need additional work. No claims of detecting every attack or identifying an attacker are justified.
