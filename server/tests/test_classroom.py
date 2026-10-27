@@ -53,6 +53,26 @@ def test_progress_rejects_extra_identity_and_bad_values(app):
         assert client.post('/api/classroom/progress', json=invalid, headers={'X-CSRF-Token': csrf}).status_code == 400
 
 
+def test_resend_verification_is_scoped_throttled_and_invalidates_old_link(app):
+    client = app.test_client()
+    login(client)
+    with app.app_context():
+        uid = db().execute("SELECT id FROM users WHERE email='student@example.test'").fetchone()['id']
+        db().execute('UPDATE users SET verified=0 WHERE id=?', (uid,))
+        db().execute('INSERT INTO verification VALUES(?,?,?)', ('expired-hash', uid, time.time()-1))
+        queue_email('student@example.test', 'Verify your security-demo email', 'old expired message')
+        db().commit()
+    assert client.post('/account/resend-verification').status_code == 400
+    csrf = client.get('/api/session').json['csrf']
+    for _ in range(2):
+        assert client.post('/account/resend-verification', data={'csrf': csrf}).status_code == 302
+    with app.app_context():
+        assert db().execute('SELECT COUNT(*) FROM verification WHERE user_id=?', (uid,)).fetchone()[0] == 1
+        assert db().execute("SELECT COUNT(*) FROM verification WHERE token='expired-hash'").fetchone()[0] == 0
+        rows = db().execute('SELECT state FROM notifications ORDER BY id').fetchall()
+        assert [r['state'] for r in rows] == ['superseded', 'pending']
+
+
 def test_full_account_alert_to_local_notifications(app):
     client = app.test_client()
     for _ in range(10):

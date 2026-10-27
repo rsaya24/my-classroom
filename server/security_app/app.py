@@ -205,6 +205,31 @@ def create_app(config=None):
             return redirect(url_for('login'))
         return render_template('auth.html', mode='register')
 
+    @app.post('/account/resend-verification')
+    @require_login()
+    def resend_verification():
+        if g.user['verified']:
+            return redirect(url_for('account'))
+        now = time.time()
+        db().execute('BEGIN IMMEDIATE')
+        recent = db().execute('SELECT token FROM verification WHERE user_id=? AND expires>?',
+                              (g.user['id'], now + 3540)).fetchone()
+        if recent:
+            db().rollback()
+            flash('Please wait one minute before requesting another verification email.')
+            return redirect(url_for('account'))
+        db().execute('DELETE FROM verification WHERE user_id=?', (g.user['id'],))
+        db().execute("UPDATE notifications SET state='superseded' WHERE recipient=? AND subject=? AND state='pending'",
+                     (g.user['email'], 'Verify your security-demo email'))
+        token = secrets.token_urlsafe(32)
+        db().execute('INSERT INTO verification VALUES(?,?,?)',
+                     (hashlib.sha256(token.encode()).hexdigest(), g.user['id'], now + 3600))
+        queue_email(g.user['email'], 'Verify your security-demo email',
+                    f'Confirm your email within one hour:\n{app.config["PUBLIC_URL"]}/verify/{token}\nIgnore this message if you did not request it.')
+        db().commit()
+        flash('A fresh verification message has been queued. Delivery depends on the configured email service.')
+        return redirect(url_for('account'))
+
     @app.route('/verify/<token>', methods=['GET', 'POST'])
     def verify(token):
         token_hash = hashlib.sha256(token.encode()).hexdigest()
